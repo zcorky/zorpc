@@ -1,6 +1,6 @@
 {
   "name": "@zorpc/core",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A Simple RPC Framework, using on Node and Browser",
   "keywords": [
     "rpc",
