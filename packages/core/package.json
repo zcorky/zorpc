@@ -60,6 +60,7 @@
     "url": "git+https://github.com/zcorky/zodash.git"
   },
   "scripts": {
+    "build": "npm run tsc",
     "tsc": "tsc",
     "test": "jest -w 1",
     "coverage": "codecov"
