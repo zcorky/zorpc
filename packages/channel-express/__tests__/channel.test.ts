@@ -1,9 +1,11 @@
 import { parse } from 'url';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import { RPCServer, RPCClient, Message, EncodedMessage, MessageError } from '@zorpc/core';
+import { RPCServer, RPCClient, MessageError } from '@zorpc/core';
 // import fetch from 'isomorphic-fetch';
 import * as request from 'supertest';
+// import * as pkg from '@zorpc/core/package.json';
+// const VERSION = pkg && pkg.version || '0.0.1';
 
 import { Client as RPCChannelClient, Server as RPCChannelServer } from '../src';
 

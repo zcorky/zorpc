@@ -39,7 +39,6 @@ export class Server implements IRPCChannelServerSide<IServerConfig> {
 
   public postMessage<Output>(output: Message<Output>): void {
     // @LOGGER need a logger: send message to client
-    console.log('[server] send message: ', output);
     this.server.postMessage(output);
   }
 
@@ -47,7 +46,6 @@ export class Server implements IRPCChannelServerSide<IServerConfig> {
     // override onMessage
     this.server.onmessage = (input: PassMessage<any>) => {
       // @LOGGER need a logger: receive message from client
-      console.log('[server] receive message: ', input);
       callback(null, input);
     };
   }
@@ -56,9 +54,7 @@ export class Server implements IRPCChannelServerSide<IServerConfig> {
     const { method, path } = this.config;
     return (req: Request, res: Response, next: NextFunction): any => {
       // @TODO here, method only support POST
-      console.log(`method: ${req.method} - ${method}, path:${req.path} - ${path}`);
       if (req.method === method && req.path === path) {
-        console.log(`RPC Server Match`);
         // @LOGGER need a logger: hit rpc
         const input = req.body;
         return this.server.createCallback(
@@ -67,13 +63,10 @@ export class Server implements IRPCChannelServerSide<IServerConfig> {
             res.json(JSON.parse(output));
           },
           () => {
-            console.log('RPC call');
             this.server.onmessage(input);
           },
         );
       }
-
-      console.log('go');
 
       next();
     }

@@ -4,11 +4,8 @@ import {
   Message,
   EncodedMessage,
 } from '@zorpc/core';
-import * as pkg from '@zorpc/core/package.json';
 
-import { IClientConfig, PassMessage } from './interface';
-
-const VERSION = pkg && pkg.version || '0.0.1';
+import { IClientConfig } from './interface';
 
 export class Client implements IRPCChannelClientSide<IClientConfig> {
   private engine: (config: IClientConfig, message: EncodedMessage<any>) => Promise<EncodedMessage<any>>;
@@ -23,9 +20,6 @@ export class Client implements IRPCChannelClientSide<IClientConfig> {
       ...clientMessage,
     };
 
-    // 
-    console.log('[client] send message: ', message);
-  
     this.engine(this.config, message)
       .then(serverMessage => {
         this.callback(null, serverMessage);
@@ -36,8 +30,6 @@ export class Client implements IRPCChannelClientSide<IClientConfig> {
 
   public onMessage<Output>(callback: MessageCallback<Output>) {
     this.callback = (error, message) => {
-      // 
-      console.log('[client] receive message: ', error, message);
       callback(error, message);
     };
   }
