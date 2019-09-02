@@ -1,3 +1,4 @@
+import { EncodedMessage } from './interface';
 export interface Message<T> {
   id: string;
   timestamps: number;
@@ -34,7 +35,7 @@ export interface IRPCChannel<Config> {
 }
 
 export interface IRPCChannelClientSide<Config> extends IRPCChannel<Config> {
-
+  useEngine(callback: (config: Config, message: EncodedMessage<any>) => Promise<EncodedMessage<any>>): void;
 }
 
 export interface IRPCChannelServerSide<Config> extends IRPCChannel<Config> {
