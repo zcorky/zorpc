@@ -1,6 +1,6 @@
 {
   "name": "@zorpc/channel-express",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Zorpc channel on express",
   "keywords": [
     "rpc",
