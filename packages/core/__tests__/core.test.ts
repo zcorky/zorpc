@@ -13,13 +13,14 @@ describe("@zorpc/core", () => {
       sendMessage(message: any) {
         mock.server.receiveMessage(null, message);
       },
-      receiveMessage(err: any, message: any): void {
-        throw new Error(`Override it`);
-      },
+      // receiveMessage(err: any, message: any): void {
+      //   throw new Error(`Override it`);
+      // },
+      receiveMessages: {},
     },
     server: {
       sendMessage(message: any) {
-        mock.client.receiveMessage(null, message);
+        mock.client.receiveMessages[message.id](null, message);
       },
       receiveMessage(err: any, message: any): void {
         throw new Error(`Override it`);
@@ -27,16 +28,39 @@ describe("@zorpc/core", () => {
     },
   };
 
-  class RPCChannelClient implements IRPCChannelClientSide<any> {
-    constructor(public readonly config?: any) {}
+  interface Config {
     
-    public postMessage<Input>(message: Message<Input>) {
-      console.log(`client postMessage: ${JSON.stringify(message)}`);
-      mock.client.sendMessage(message);
+  }
+
+  class RPCChannelClient implements IRPCChannelClientSide<Config> {
+    private receiveMessage: MessageCallback<any>;
+    private sendMessage: (input: EncodedMessage<any>) => Promise<EncodedMessage<any>>;
+    constructor(public readonly config?: Config) {}
+    
+    public postMessage<Input>(clientMessage: Message<Input>) {
+      console.log(`client postMessage: ${JSON.stringify(clientMessage)}`);
+      // mock.client.sendMessage(clientMessage);
+      this.sendMessage(clientMessage)
+        .then(serverMessage => {
+          this.receiveMessage(null, serverMessage);
+        })
+        .catch(error => {
+          this.receiveMessage(error, clientMessage);
+        });
     }
 
     public onMessage<Output>(callback: MessageCallback<Output>) {
-      mock.client.receiveMessage = callback;
+      // mock.client.receiveMessage = callback;
+      this.receiveMessage = (error, message) => {
+        console.log('client onMessage: ', error, message);
+        callback(error, message);
+      };
+    }
+
+    public useEngine(callback: (config: Config, message: EncodedMessage<any>) => Promise<EncodedMessage<any>>): void {
+      this.sendMessage = (input: EncodedMessage<any>) => {
+        return callback(this.config, input);
+      };
     }
   }
 
@@ -44,7 +68,7 @@ describe("@zorpc/core", () => {
     private server = {
       // consumers: {},
       postMessage(message: EncodedMessage<any>) {
-        console.log('consume id: ', message.id);
+        console.log('server postMessage: ', message);
         // this.useCallback(message);
         mock.server.sendMessage(message);
       },
@@ -125,6 +149,22 @@ describe("@zorpc/core", () => {
     }),
   };
 
+  channel.client.useEngine((config, clientMessage) => {
+    return new Promise((resolve, reject) => {
+      // create listen before is better
+      const message = clientMessage;
+      mock.client.receiveMessages[message.id] = (error: any, message: any) => {
+        if (error) {
+          return reject(error);
+        }
+        
+        return resolve(message);
+      }
+
+      mock.client.sendMessage(clientMessage);
+    });
+  });
+
   rpc.server.register('health', async () => {
     return true;
   });
@@ -137,8 +177,9 @@ describe("@zorpc/core", () => {
     const virtualServer = {
       use(middleware: Function) {
         // call middleware
-        console.log('use call');
+        // console.log('use call');
         mock.server.receiveMessage = (error: any, message: any) => {
+          console.log('server onMessage: ', message);
           middleware(message);
         };
       },
@@ -153,14 +194,14 @@ describe("@zorpc/core", () => {
   it('works', async () => {
     await new Promise(resolve => {
       setTimeout(() => {
-        console.log('setTimeout run');
-  
+        // console.log('setTimeout run');
         rpc.client.connect().then(() => {
           rpc.client.consume('health', null).then((result: string) => {
             expect(result).toBe(true);
             console.log(`consume health service: ${result}`);
           });
       
+          console.log('consume add service: 1 + 1');
           rpc.client.consume('add', { left: 1, right: 1 }).then((result: string) => {
             console.log(`consume add service: 1 + 1 = ${result}`);
             expect(result).toBe(2);
