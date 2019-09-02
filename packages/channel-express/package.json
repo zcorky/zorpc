@@ -5,7 +5,8 @@
   "keywords": [
     "rpc",
     "zorpc",
-    "zorpc-channel"
+    "zorpc-channel",
+    "express"
   ],
   "author": "zero <tobewhatwewant@gmail.com>",
   "homepage": "https://github.com/zcorky/zorpc#readme",
@@ -67,17 +68,14 @@
     "url": "https://github.com/zcorky/zodash/issues"
   },
   "dependencies": {
-    "@zorpc/core": "^0.0.2",
-    "isomorphic-fetch": "^2.2.1"
+    "@zorpc/core": "^0.0.2"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.1",
     "@types/express": "^4.17.1",
-    "@types/isomorphic-fetch": "^0.0.35",
     "@types/supertest": "^2.0.8",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "jest-express": "^1.10.1",
     "supertest": "^4.0.2"
   }
 }
