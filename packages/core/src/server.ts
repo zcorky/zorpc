@@ -107,6 +107,7 @@ export class RPCServer<Config> implements IRPCServer<Config> {
     this.mountMessageListener();
 
     // log start
+    // @LOGGER log start
     console.log(`RPC server start`);
 
     // prepare done, and return config
@@ -198,8 +199,6 @@ export class RPCServer<Config> implements IRPCServer<Config> {
 
   public decodeMessage<Visible>(message: EncodedMessage<any>): DecodedMessage<Visible> {
     let decodedMessage = message as any as DecodedMessage<Visible>;
-
-    console.log(`server decode message: `, message, typeof this.options.onMessageDecrypt);
 
     if (this.options.onMessageDecrypt) {
       const strigified = this.options.onMessageDecrypt(message.data);

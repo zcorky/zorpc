@@ -41,8 +41,6 @@ export class RPCClient<Config> implements IRPCClient<Config> {
 
     const message = this.createMessage(service, input);
 
-    // console.log('current consumers: ', Object.keys(this.consumers).length, Object.keys(this.consumers));
-    // console.log('[core][client] createCallback before: ', JSON.stringify(message), typeof callback);
     if (typeof callback === 'function') {
       return this.createCallback<any>(message.id, callback, () => {
         this.channel.postMessage(message);
@@ -50,9 +48,7 @@ export class RPCClient<Config> implements IRPCClient<Config> {
     }
 
     return new Promise<Output>((resolve, reject) => {
-      // console.log('[core][client] createCallback: ', JSON.stringify(message));
       const callback = (output: Output) => {
-        console.log(`consume: `, { service, body: input }, output);
         // @TODO ERROR MESSAGE RESPONSE
         if ((output as any).errcode) {
           const error = new Error((output as any).errmessage) as MessageError;
@@ -89,7 +85,6 @@ export class RPCClient<Config> implements IRPCClient<Config> {
         this.useCallback(serverMessage);
       } catch (error) {
         // @TODO
-        console.log(`decodeMessage error: ${JSON.stringify(rawServerMessage)}`);
         return this.onError(error, {
           id: rawServerMessage.id,
           timestamps: rawServerMessage.timestamps,
@@ -151,14 +146,12 @@ export class RPCClient<Config> implements IRPCClient<Config> {
 
   private onError<T>(error: MessageError, serverMessage: DecodedMessage<any>) {
     const { errcode = 500, errmessage, message } = error;
-    console.log(`onError: `, error, serverMessage);
     const serverErrorMessage = this.restoreMessage(serverMessage, {
       errcode,
       errmessage: errmessage || message,
     });
 
     // consume in callback
-    console.log(`useCallback: `, serverErrorMessage);
     this.useCallback(serverErrorMessage);
   }
 
