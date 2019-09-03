@@ -388,8 +388,8 @@ describe("@zorpc/core", () => {
         return '~' + text;
       },
       decrypt(text: string) {
-        console.log(`message: `, text);
-        console.log(`server onMessgae Decrypt error`);
+        // console.log(`message: `, text);
+        // console.log(`server onMessgae Decrypt error`);
         throw new Error(`crypto.decrypt throw a error`);
         return text.slice(1);
       },

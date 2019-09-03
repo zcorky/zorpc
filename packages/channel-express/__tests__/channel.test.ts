@@ -206,7 +206,9 @@ describe("@zorpc/channel-express", () => {
         // console.log('setTimeout run');
   
         rpc.client.connect().then(() => {
-          rpc.client.consume('throw.error', null).catch((result: MessageError) => {
+          rpc.client.consume('throw.error', null).then((response) => {
+            console.log(`throw.error response: `, response);
+          }).catch((result: MessageError) => {
             // console.log(`consume throw.error service: ${JSON.stringify(result)}`);
             // expect(result).toEqual({ errcode, errmessage });
             expect(result.errcode).toEqual(errcode);

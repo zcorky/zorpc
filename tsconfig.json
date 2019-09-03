@@ -12,7 +12,11 @@
     "lib": [
       "es6"
     ],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@zorpc/*": ["packages/*"]
+    }
   },
   "exclude": [
     "node_modules",

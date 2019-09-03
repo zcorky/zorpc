@@ -153,7 +153,7 @@ describe("@zorpc/channel-express", () => {
             resolve();
           });
         });
-      }, 1000);
+      }, 0);
     });
   });
 
