@@ -25,7 +25,7 @@ export class Client implements IRPCChannelClientSide<IClientConfig> {
         this.callback(null, serverMessage);
       }).catch(error => {
         this.callback(error, clientMessage);
-      });;
+      });
   }
 
   public onMessage<Output>(callback: MessageCallback<Output>) {
