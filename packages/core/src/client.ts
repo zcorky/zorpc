@@ -42,7 +42,7 @@ export class RPCClient<Config> implements IRPCClient<Config> {
     const message = this.createMessage(service, input);
 
     // console.log('current consumers: ', Object.keys(this.consumers).length, Object.keys(this.consumers));
-    
+    console.log('[core][client] createCallback before: ', JSON.stringify(message), typeof callback);
     if (typeof callback === 'function') {
       this.createCallback<any>(message.id, callback, () => {
         this.channel.postMessage(message);
@@ -51,11 +51,11 @@ export class RPCClient<Config> implements IRPCClient<Config> {
     }
 
     return new Promise<Output>((resolve) => {
-      this.createCallback<any>(
-        message.id,
-        (output: Output) => {
-          resolve(output);
-        }, () => {
+      console.log('[core][client] createCallback: ', JSON.stringify(message));
+      const callback = (output: Output) => {
+        resolve(output);
+      };
+      this.createCallback<any>(message.id, callback, () => {
           this.channel.postMessage(message);
         },
       );
@@ -86,6 +86,10 @@ export class RPCClient<Config> implements IRPCClient<Config> {
   }
 
   private useCallback(message: DecodedMessage<any>) {
+    if (!message.id) {
+      throw new Error(`Invalid Message without id`);
+    }
+
     const consumeOutputOnlyOnceCallback = this.consumers[message.id];
 
     if (!consumeOutputOnlyOnceCallback) {
