@@ -27,7 +27,7 @@ export class RPCClient<Config> implements IRPCClient<Config> {
 
     // 2 consume health service
     this.isHealthy = await this.consume(HEALTH_SERVICE, null);
-    if (!this.isHealthy) {
+    if (this.isHealthy !== true) {
       throw new Error(`Connect Serveice Center Failed ! Please Check and Try again.`);
     }
   }
@@ -42,19 +42,28 @@ export class RPCClient<Config> implements IRPCClient<Config> {
     const message = this.createMessage(service, input);
 
     // console.log('current consumers: ', Object.keys(this.consumers).length, Object.keys(this.consumers));
-    console.log('[core][client] createCallback before: ', JSON.stringify(message), typeof callback);
+    // console.log('[core][client] createCallback before: ', JSON.stringify(message), typeof callback);
     if (typeof callback === 'function') {
-      this.createCallback<any>(message.id, callback, () => {
+      return this.createCallback<any>(message.id, callback, () => {
         this.channel.postMessage(message);
       });
-      return ;
     }
 
-    return new Promise<Output>((resolve) => {
-      console.log('[core][client] createCallback: ', JSON.stringify(message));
+    return new Promise<Output>((resolve, reject) => {
+      // console.log('[core][client] createCallback: ', JSON.stringify(message));
       const callback = (output: Output) => {
+        console.log(`consume: `, { service, body: input }, output);
+        // @TODO ERROR MESSAGE RESPONSE
+        if ((output as any).errcode) {
+          const error = new Error((output as any).errmessage) as MessageError;
+          error.errcode = (output as any).errcode
+          error.errmessage = (output as any).errmessage;
+          // `[${(output as any).errcode}] ${(output as any).errmessage}`
+          return reject(error);
+        }
         resolve(output);
       };
+
       this.createCallback<any>(message.id, callback, () => {
           this.channel.postMessage(message);
         },
@@ -64,15 +73,32 @@ export class RPCClient<Config> implements IRPCClient<Config> {
 
   private mountMessageListener() {
     this.channel.onMessage((error, rawServerMessage) => {
-      // parse message
-      const serverMessage = this.parseMessage(rawServerMessage);
+      try {
+        // parse message
+        const serverMessage = this.decodeMessage(rawServerMessage);
 
-      if (error) {
-        return this.onError(error, serverMessage);
+        if (!serverMessage || !serverMessage.id || !serverMessage.data) {
+          throw new Error(`Invalid Message, or without id, data`);
+        }
+
+        if (error) {
+          return this.onError(error, serverMessage);
+        }
+
+        // call callback
+        this.useCallback(serverMessage);
+      } catch (error) {
+        // @TODO
+        console.log(`decodeMessage error: ${JSON.stringify(rawServerMessage)}`);
+        return this.onError(error, {
+          id: rawServerMessage.id,
+          timestamps: rawServerMessage.timestamps,
+          data: {
+            service: 'broken',
+            body: null,
+          },
+        });
       }
-
-      // call callback
-      this.useCallback(serverMessage);
     });
   }
 
@@ -86,10 +112,6 @@ export class RPCClient<Config> implements IRPCClient<Config> {
   }
 
   private useCallback(message: DecodedMessage<any>) {
-    if (!message.id) {
-      throw new Error(`Invalid Message without id`);
-    }
-
     const consumeOutputOnlyOnceCallback = this.consumers[message.id];
 
     if (!consumeOutputOnlyOnceCallback) {
@@ -114,21 +136,29 @@ export class RPCClient<Config> implements IRPCClient<Config> {
     return clientMessage;
   }
 
-  private parseMessage(rawServerMessage: EncodedMessage<any>) {
-    const serverMessage = this.decodeMessage(rawServerMessage);
-    return serverMessage;
+  private restoreMessage<Output>(serverMessage: DecodedMessage<Output>, body: Output): DecodedMessage<Output> {
+    const clientMessage = {
+      id: serverMessage.id,
+      timestamps: Date.now(),
+      data: {
+        service: serverMessage.data.service,
+        body,
+      },
+    };
+
+    return clientMessage;
   }
 
-  private onError<T>(error: MessageError, serverMessage: DecodedMessage<T>) {
+  private onError<T>(error: MessageError, serverMessage: DecodedMessage<any>) {
     const { errcode = 500, errmessage, message } = error;
-    const { service } = serverMessage.data;
-
-    const serverErrorMessage = this.createMessage(service, {
+    console.log(`onError: `, error, serverMessage);
+    const serverErrorMessage = this.restoreMessage(serverMessage, {
       errcode,
       errmessage: errmessage || message,
     });
 
     // consume in callback
+    console.log(`useCallback: `, serverErrorMessage);
     this.useCallback(serverErrorMessage);
   }
 

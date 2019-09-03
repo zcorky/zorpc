@@ -126,13 +126,17 @@ export class RPCServer<Config> implements IRPCServer<Config> {
 
   private mountMessageListener() {
     this.channel.onMessage<any>((error, rawClientMessage) => {
-      const clientMessage = this.parseMessage(rawClientMessage);
+      try {
+        const clientMessage = this.decodeMessage(rawClientMessage);
 
-      if (error) {
-        return this.onError(error, clientMessage);
+        if (error) {
+          return this.onError(error, clientMessage);
+        }
+  
+        this.consume(clientMessage);
+      } catch (error) {
+        this.onError(error, rawClientMessage);
       }
-
-      this.consume(clientMessage);
     });
   }
 
@@ -162,11 +166,6 @@ export class RPCServer<Config> implements IRPCServer<Config> {
     const serverMessage = this.encodeMessage(rawServerMessage);
 
     return serverMessage;
-  }
-
-  private parseMessage<T>(rawClientMessage: EncodedMessage<any>) {
-    const clientMessage = this.decodeMessage<T>(rawClientMessage);
-    return clientMessage;
   }
 
   private onError<T>(error: MessageError, clientMessage: DecodedMessage<T>) {
@@ -199,6 +198,8 @@ export class RPCServer<Config> implements IRPCServer<Config> {
 
   public decodeMessage<Visible>(message: EncodedMessage<any>): DecodedMessage<Visible> {
     let decodedMessage = message as any as DecodedMessage<Visible>;
+
+    console.log(`server decode message: `, message, typeof this.options.onMessageDecrypt);
 
     if (this.options.onMessageDecrypt) {
       const strigified = this.options.onMessageDecrypt(message.data);

@@ -38,7 +38,7 @@ describe("@zorpc/core", () => {
     constructor(public readonly config?: Config) {}
     
     public postMessage<Input>(clientMessage: Message<Input>) {
-      console.log(`client postMessage: ${JSON.stringify(clientMessage)}`);
+      // console.log(`client postMessage: ${JSON.stringify(clientMessage)}`);
       // mock.client.sendMessage(clientMessage);
       this.sendMessage(clientMessage)
         .then(serverMessage => {
@@ -52,7 +52,7 @@ describe("@zorpc/core", () => {
     public onMessage<Output>(callback: MessageCallback<Output>) {
       // mock.client.receiveMessage = callback;
       this.receiveMessage = (error, message) => {
-        console.log('client onMessage: ', error, message);
+        // console.log('client onMessage: ', error, message);
         callback(error, message);
       };
     }
@@ -68,7 +68,7 @@ describe("@zorpc/core", () => {
     private server = {
       // consumers: {},
       postMessage(message: EncodedMessage<any>) {
-        console.log('server postMessage: ', message);
+        // console.log('server postMessage: ', message);
         // this.useCallback(message);
         mock.server.sendMessage(message);
       },
@@ -179,7 +179,7 @@ describe("@zorpc/core", () => {
         // call middleware
         // console.log('use call');
         mock.server.receiveMessage = (error: any, message: any) => {
-          console.log('server onMessage: ', message);
+          // console.log('server onMessage: ', message);
           middleware(message);
         };
       },
@@ -198,12 +198,12 @@ describe("@zorpc/core", () => {
         rpc.client.connect().then(() => {
           rpc.client.consume('health', null).then((result: string) => {
             expect(result).toBe(true);
-            console.log(`consume health service: ${result}`);
+            // console.log(`consume health service: ${result}`);
           });
       
-          console.log('consume add service: 1 + 1');
+          // console.log('consume add service: 1 + 1');
           rpc.client.consume('add', { left: 1, right: 1 }).then((result: string) => {
-            console.log(`consume add service: 1 + 1 = ${result}`);
+            // console.log(`consume add service: 1 + 1 = ${result}`);
             expect(result).toBe(2);
             resolve();
           });
@@ -215,16 +215,16 @@ describe("@zorpc/core", () => {
   it('add option onMessageEncrypt/Decrypt', async () => {
     await new Promise(resolve => {
       setTimeout(() => {
-        console.log('setTimeout run');
+        // console.log('setTimeout run');
   
         rpc.client.connect().then(() => {
           rpc.client.consume('health', null).then((result: string) => {
             expect(result).toBe(true);
-            console.log(`consume health service: ${result}`);
+            // console.log(`consume health service: ${result}`);
           });
       
           rpc.client.consume('add', { left: 1, right: 1 }).then((result: string) => {
-            console.log(`consume add service: 1 + 1 = ${JSON.stringify(result)}`);
+            // console.log(`consume add service: 1 + 1 = ${JSON.stringify(result)}`);
             expect(result).toBe(2);
             resolve();
           });
@@ -245,12 +245,16 @@ describe("@zorpc/core", () => {
 
     await new Promise(resolve => {
       setTimeout(() => {
-        console.log('setTimeout run');
+        // console.log('setTimeout run');
   
         rpc.client.connect().then(() => {
           rpc.client.consume('throw.error', null).then((result: string) => {
-            console.log(`consume throw.error service: ${JSON.stringify(result)}`);
-            expect(result).toEqual({ errcode, errmessage });
+            // console.log(`consume throw.error service: ${JSON.stringify(result)}`);
+            // expect(result).toEqual({ errcode, errmessage });
+            // resolve();
+          }).catch(error => {
+            expect(error.errcode).toEqual(errcode);
+            expect(error.errmessage).toEqual(errmessage);
             resolve();
           });
         });
@@ -262,10 +266,10 @@ describe("@zorpc/core", () => {
     await new Promise(resolve => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
-          rpc.client.consume('service.notfound', null).then((result: any) => {
-            console.log(`consume service.notfound service: ${JSON.stringify(result)}`);
-            expect(result.errcode).not.toBeUndefined();
-            expect(result.errmessage).not.toBeUndefined();
+          rpc.client.consume('service.notfound', null).catch((error: any) => {
+            // console.log(`consume service.notfound service: ${JSON.stringify(result)}`);
+            expect(error.errcode).not.toBeUndefined();
+            expect(error.errmessage).not.toBeUndefined();
             resolve();
           });
         });
@@ -282,12 +286,183 @@ describe("@zorpc/core", () => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
           rpc.client.consume('callback.service', null, (result: any) => {
-            console.log(`consume callback.service service: ${JSON.stringify(result)}`);
+            // console.log(`consume callback.service service: ${JSON.stringify(result)}`);
             // expect(result.errcode).not.toBeUndefined();
             // expect(result.errmessage).not.toBeUndefined();
             expect(result).toBe('good');
             resolve();
           });
+        });
+      }, 0);
+    }); 
+  });
+
+  it(`client onMessgae Encrypt error will cause break`, async () => {
+    const crypto = {
+      encrypt(text: string) {
+        // console.log(`client onMessgae Encrypt error`);
+        throw new Error(`crypto.encrypt throw a error`);
+        // return '~' + text;
+      },
+      decrypt(text: string) {
+        return text.slice(1);
+      },
+    };
+  
+    const channel = {
+      client: new RPCChannelClient(),
+      server: new RPCChannelServer(),
+    };
+  
+    const rpc = {
+      client: new RPCClient(channel.client, {
+        onMessageEncrypt: crypto.encrypt,
+        onMessageDecrypt: crypto.decrypt,
+      }),
+      server: new RPCServer(channel.server, {
+        onMessageEncrypt: crypto.encrypt,
+        onMessageDecrypt: crypto.decrypt,
+      }),
+    };
+  
+    channel.client.useEngine((config, clientMessage) => {
+      return new Promise((resolve, reject) => {
+        // create listen before is better
+        const message = clientMessage;
+        mock.client.receiveMessages[message.id] = (error: any, message: any) => {
+          if (error) {
+            return reject(error);
+          }
+          
+          return resolve(message);
+        }
+  
+        mock.client.sendMessage(clientMessage);
+      });
+    });
+  
+    rpc.server.register('health', async () => {
+      return true;
+    });
+  
+    rpc.server.register<{ left: number, right: number }, number>('add', async (input) => {
+      return input.left + input.right;
+    });
+  
+    rpc.server.prepare().then(() => {
+      const virtualServer = {
+        use(middleware: Function) {
+          // call middleware
+          // console.log('use call');
+          mock.server.receiveMessage = (error: any, message: any) => {
+            // console.log('server onMessage: ', message);
+            middleware(message);
+          };
+        },
+        listen() {}
+      };
+  
+      virtualServer.use(rpc.server.middleware());
+  
+      virtualServer.listen();
+    }); 
+    
+    await new Promise(resolve => {
+      setTimeout(() => {
+        rpc.client.connect().then(() => {
+          // rpc.client.consume('callback.service', null, (result: any) => {
+          //   expect(result).toBe('good');
+          //   resolve();
+          // });
+        }).catch(error => {
+          expect(error.message).toBe('crypto.encrypt throw a error');
+          resolve();
+        });
+      }, 0);
+    }); 
+  });
+
+  it(`server onMessgae Decrypt error will cause break`, async () => {
+    const crypto = {
+      encrypt(text: string) {
+        return '~' + text;
+      },
+      decrypt(text: string) {
+        console.log(`message: `, text);
+        console.log(`server onMessgae Decrypt error`);
+        throw new Error(`crypto.decrypt throw a error`);
+        return text.slice(1);
+      },
+    };
+  
+    const channel = {
+      client: new RPCChannelClient(),
+      server: new RPCChannelServer(),
+    };
+  
+    const rpc = {
+      client: new RPCClient(channel.client, {
+        onMessageEncrypt: crypto.encrypt,
+        onMessageDecrypt: crypto.decrypt,
+      }),
+      server: new RPCServer(channel.server, {
+        onMessageEncrypt: crypto.encrypt,
+        onMessageDecrypt: crypto.decrypt,
+      }),
+    };
+  
+    channel.client.useEngine((config, clientMessage) => {
+      return new Promise((resolve, reject) => {
+        // create listen before is better
+        const message = clientMessage;
+        mock.client.receiveMessages[message.id] = (error: any, message: any) => {
+          if (error) {
+            return reject(error);
+          }
+          
+          return resolve(message);
+        }
+  
+        mock.client.sendMessage(clientMessage);
+      });
+    });
+  
+    rpc.server.register('health', async () => {
+      return true;
+    });
+  
+    rpc.server.register<{ left: number, right: number }, number>('add', async (input) => {
+      return input.left + input.right;
+    });
+  
+    rpc.server.prepare().then(() => {
+      const virtualServer = {
+        use(middleware: Function) {
+          // call middleware
+          // console.log('use call');
+          mock.server.receiveMessage = (error: any, message: any) => {
+            // console.log('server onMessage: ', message);
+            middleware(message);
+          };
+        },
+        listen() {}
+      };
+  
+      virtualServer.use(rpc.server.middleware());
+  
+      virtualServer.listen();
+    }); 
+    
+    await new Promise(resolve => {
+      setTimeout(() => {
+        rpc.client.connect().then(() => {
+          // rpc.client.consume('callback.service', null, (result: any) => {
+          //   expect(result).toBe('good');
+          //   resolve();
+          // });
+        }).catch(error => {
+          expect(error.message).toBe('crypto.decrypt throw a error');
+          resolve();
         });
       }, 0);
     }); 
