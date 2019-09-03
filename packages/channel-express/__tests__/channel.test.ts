@@ -11,14 +11,14 @@ import { Client as RPCChannelClient, Server as RPCChannelServer } from '../src';
 
 const app = express();
 app.use((req, res, next) => {
-  console.log('request: ', req.path, req.body);
+  // console.log('request: ', req.path, req.body);
   next();
 });
 const fetch = (url: string, options: RequestInit) => {
   const path = parse(url).path;
   // return request(app)[options.method.toLowerCase()](path);
   return new Promise<{ json: () => Promise<any>}>((resolve, reject) => {
-    console.log(`supertest: `, path, options);
+    // console.log(`supertest: `, path, options);
     request(app)
       .post(path)
       .set(options.headers)
@@ -26,7 +26,7 @@ const fetch = (url: string, options: RequestInit) => {
       .send(JSON.parse(options.body as any as string))
       .expect(200)
       .end((error, res) => {
-        console.log(`supertest done: `, path, options);
+        // console.log(`supertest done: `, path, options);
         if (error) return reject(error);
         return resolve({
           json: async () => res.body,
@@ -124,18 +124,18 @@ describe("@zorpc/channel-express", () => {
   });
 
   rpc.server.prepare().then((config) => {
-    console.log('[server] prepare done');
+    // console.log('[server] prepare done');
     app.get('/health', (req, res, next) => {
       res.sendStatus(200);
     });
     app.use((req, res, next) => {
-      console.log('request 2: ', req.path, req.body);
+      // console.log('request 2: ', req.path, req.body);
       next();
     });
     app.use(bodyParser.json());
     // app.use(bodyParser.urlencoded({ extended: false }));
     app.use((req, res, next) => {
-      console.log('request 3: ', req.path, req.body);
+      // console.log('request 3: ', req.path, req.body);
       next();
     });
     app.use(rpc.server.middleware());
@@ -148,20 +148,20 @@ describe("@zorpc/channel-express", () => {
   it('works', async () => {
     await new Promise(resolve => {
       setTimeout(() => {
-        console.log('setTimeout run');
+        // console.log('setTimeout run');
   
         rpc.client.connect().then(() => {
-          console.log(`rpc connected`);
+          // console.log(`rpc connected`);
 
           // resolve();
 
           rpc.client.consume('health', null).then((result: string) => {
             expect(result).toBe(true);
-            console.log(`consume health service: ${result}`);
+            // console.log(`consume health service: ${result}`);
           });
       
           rpc.client.consume('add', { left: 1, right: 1 }).then((result: string) => {
-            console.log(`consume add service: 1 + 1 = ${result}`);
+            // console.log(`consume add service: 1 + 1 = ${result}`);
             expect(result).toBe(2);
             resolve();
           });
@@ -173,16 +173,16 @@ describe("@zorpc/channel-express", () => {
   it('add option onMessageEncrypt/Decrypt', async () => {
     await new Promise(resolve => {
       setTimeout(() => {
-        console.log('setTimeout run');
+        // console.log('setTimeout run');
   
         rpc.client.connect().then(() => {
           rpc.client.consume('health', null).then((result: string) => {
             expect(result).toBe(true);
-            console.log(`consume health service: ${result}`);
+            // console.log(`consume health service: ${result}`);
           });
       
           rpc.client.consume('add', { left: 1, right: 1 }).then((result: string) => {
-            console.log(`consume add service: 1 + 1 = ${JSON.stringify(result)}`);
+            // console.log(`consume add service: 1 + 1 = ${JSON.stringify(result)}`);
             expect(result).toBe(2);
             resolve();
           });
@@ -203,12 +203,14 @@ describe("@zorpc/channel-express", () => {
 
     await new Promise(resolve => {
       setTimeout(() => {
-        console.log('setTimeout run');
+        // console.log('setTimeout run');
   
         rpc.client.connect().then(() => {
-          rpc.client.consume('throw.error', null).then((result: string) => {
-            console.log(`consume throw.error service: ${JSON.stringify(result)}`);
-            expect(result).toEqual({ errcode, errmessage });
+          rpc.client.consume('throw.error', null).catch((result: MessageError) => {
+            // console.log(`consume throw.error service: ${JSON.stringify(result)}`);
+            // expect(result).toEqual({ errcode, errmessage });
+            expect(result.errcode).toEqual(errcode);
+            expect(result.errmessage).toEqual(errmessage);
             resolve();
           });
         });
@@ -220,8 +222,8 @@ describe("@zorpc/channel-express", () => {
     await new Promise(resolve => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
-          rpc.client.consume('service.notfound', null).then((result: any) => {
-            console.log(`consume service.notfound service: ${JSON.stringify(result)}`);
+          rpc.client.consume('service.notfound', null).catch((result: any) => {
+            // console.log(`consume service.notfound service: ${JSON.stringify(result)}`);
             expect(result.errcode).not.toBeUndefined();
             expect(result.errmessage).not.toBeUndefined();
             resolve();
@@ -240,7 +242,7 @@ describe("@zorpc/channel-express", () => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
           rpc.client.consume('callback.service', null, (result: any) => {
-            console.log(`consume callback.service service: ${JSON.stringify(result)}`);
+            // console.log(`consume callback.service service: ${JSON.stringify(result)}`);
             // expect(result.errcode).not.toBeUndefined();
             // expect(result.errmessage).not.toBeUndefined();
             expect(result).toBe('good');
