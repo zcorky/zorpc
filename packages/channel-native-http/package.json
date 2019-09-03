@@ -1,6 +1,6 @@
 {
   "name": "@zorpc/channel-native-http",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Zorpc channel on native http module",
   "keywords": [
     "rpc",
@@ -71,7 +71,7 @@
     "url": "https://github.com/zcorky/zodash/issues"
   },
   "dependencies": {
-    "@zorpc/core": "^0.0.5"
+    "@zorpc/core": "^0.0.6"
   },
   "devDependencies": {
     "@types/supertest": "^2.0.8",

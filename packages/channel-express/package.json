@@ -1,6 +1,6 @@
 {
   "name": "@zorpc/channel-express",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Zorpc channel on express",
   "keywords": [
     "rpc",
@@ -71,7 +71,7 @@
     "url": "https://github.com/zcorky/zodash/issues"
   },
   "dependencies": {
-    "@zorpc/core": "^0.0.5"
+    "@zorpc/core": "^0.0.6"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.1",

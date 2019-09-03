@@ -1,6 +1,6 @@
 {
   "name": "@zorpc/channel-koa",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Zorpc channel on koa",
   "keywords": [
     "rpc",
@@ -71,7 +71,7 @@
     "url": "https://github.com/zcorky/zodash/issues"
   },
   "dependencies": {
-    "@zorpc/core": "^0.0.5"
+    "@zorpc/core": "^0.0.6"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.1",
