@@ -1,0 +1,81 @@
+{
+  "name": "@zorpc/channel-socket.io",
+  "version": "0.0.0",
+  "description": "Zorpc channel on socket.io",
+  "keywords": [
+    "rpc",
+    "zorpc",
+    "zorpc-channel",
+    "socket.io"
+  ],
+  "author": "zero <tobewhatwewant@gmail.com>",
+  "homepage": "https://github.com/zcorky/zorpc#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "jest": {
+    "roots": [
+      "__tests__"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": ".*\\.(spec|test)\\.(ts|tsx)$",
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ],
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 50,
+        "functions": 90,
+        "lines": 80,
+        "statements": -10
+      }
+    },
+    "preset": "ts-jest"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zcorky/zodash.git"
+  },
+  "scripts": {
+    "build": "npm run tsc",
+    "tsc": "tsc",
+    "test": "jest -w 1",
+    "coverage": "codecov",
+    "prepublishOnly": "npm run build"
+  },
+  "bugs": {
+    "url": "https://github.com/zcorky/zodash/issues"
+  },
+  "dependencies": {
+    "@zorpc/core": "^0.0.5"
+  },
+  "devDependencies": {
+    "@types/socket.io": "^2.1.2",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0"
+  }
+}
