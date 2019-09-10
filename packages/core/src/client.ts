@@ -55,13 +55,14 @@ export class RPCClient<Config> implements IRPCClient<Config> {
     return new Promise<Output>((resolve, reject) => {
       const callback = (output: Output) => {
         // @TODO ERROR MESSAGE RESPONSE
-        if ((output as any).errcode) {
+        if (output && (output as any).errcode) {
           const error = new Error((output as any).errmessage) as MessageError;
           error.errcode = (output as any).errcode
           error.errmessage = (output as any).errmessage;
           // `[${(output as any).errcode}] ${(output as any).errmessage}`
           return reject(error);
         }
+        
         resolve(output);
       };
 
