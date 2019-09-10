@@ -21,7 +21,12 @@ export class RPCClient<Config> implements IRPCClient<Config> {
     
   }
 
-  public async connect() {  
+  public async connect() {
+    // if already connect, it is not necessary to do health check
+    if (this.isHealthy) {
+      return ;
+    }
+
     // 1 mount listener
     this.mountMessageListener();
 

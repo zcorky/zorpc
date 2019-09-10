@@ -8,7 +8,6 @@ export interface Connection {
   host: string;
   port: number;
   event: string;
-  method: 'POST';
 }
 
 export interface IClientConfig extends Connection, Config {
