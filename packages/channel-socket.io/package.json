@@ -1,6 +1,6 @@
 {
   "name": "@zorpc/channel-socket.io",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Zorpc channel on socket.io",
   "keywords": [
     "rpc",
@@ -71,7 +71,7 @@
     "url": "https://github.com/zcorky/zodash/issues"
   },
   "dependencies": {
-    "@zorpc/core": "^0.0.6"
+    "@zorpc/core": "^0.0.7"
   },
   "devDependencies": {
     "@types/socket.io": "^2.1.2",
