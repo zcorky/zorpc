@@ -1,4 +1,3 @@
-import { EncodedMessage } from './interface';
 export interface Message<T> {
   id: string;
   timestamps: number;

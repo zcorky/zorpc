@@ -1,0 +1,4 @@
+export const CHANNELS = {
+  REGISTER_EVENT: 'REGISTER_EVENT',
+  FIRE_EVENT: 'FIRE_EVENT',
+};
