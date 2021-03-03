@@ -12,6 +12,7 @@ const HEALTH_SERVICE = 'health';
 
 export class RPCClient<Config> implements IRPCClient<Config> {
   private isHealthy: boolean = false;
+  private isListenerMounted: boolean = false;
   private consumers: Record<string, (output: any) => void> = {};
 
   constructor(
@@ -74,6 +75,9 @@ export class RPCClient<Config> implements IRPCClient<Config> {
   }
 
   private mountMessageListener() {
+    if (this.isListenerMounted) return;
+    this.isListenerMounted = true;
+    
     this.channel.onMessage((error, rawServerMessage) => {
       try {
         // parse message
