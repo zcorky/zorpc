@@ -11,7 +11,7 @@ import {
 const HEALTH_SERVICE = 'health';
 
 export class RPCClient<Config> implements IRPCClient<Config> {
-  private isHealthy: boolean = false;
+  private isServerReady: boolean = false;
   private isListenerMounted: boolean = false;
   private consumers: Record<string, (output: any) => void> = {};
 
@@ -22,26 +22,44 @@ export class RPCClient<Config> implements IRPCClient<Config> {
     
   }
 
+  private canReceiveMessage(service: string) {
+    // 1. when service is not ready, only allow health check message
+    // 2. when service ready, all message is allow to receive
+    return this.isServerReady || service === HEALTH_SERVICE;
+  }
+
+  private canSendMessage(service: string) {
+    // 1. when service is not ready, only allow health check message
+    // 2. when service ready, all message is allow to send
+    return this.isServerReady || service === HEALTH_SERVICE;
+  }
+
+  private async healthCheck() {
+    if (this.isServerReady) return;
+
+    this.isServerReady = await this.consume(HEALTH_SERVICE, null);
+    if (this.isServerReady !== true) {
+      throw new Error(`Connect Serveice Center Failed ! Please Check and Try again.`);
+    }
+  }
+
   public async connect() {
     // if already connect, it is not necessary to do health check
-    if (this.isHealthy) {
+    if (this.isServerReady) {
       return ;
     }
 
-    // 1 mount listener
-    this.mountMessageListener();
+    // 1 mount message listener
+    await this.listen();
 
     // 2 consume health service
-    this.isHealthy = await this.consume(HEALTH_SERVICE, null);
-    if (this.isHealthy !== true) {
-      throw new Error(`Connect Serveice Center Failed ! Please Check and Try again.`);
-    }
+    await this.healthCheck();
   }
 
   public consume<Input, Output>(service: string, input: Input): Promise<Output>
   public consume<Input, Output>(service: string, input: Input, callback: (output: Output) => void): void
   public consume<Input, Output>(service: any, input: Input, callback?: any): any {
-    if (!this.isHealthy && service !== HEALTH_SERVICE) {
+    if (!this.canSendMessage(service)) {
       throw new Error(`Service Center is not ready. Please Connect first or Check what's wrong ?`);
     }
 
@@ -74,7 +92,7 @@ export class RPCClient<Config> implements IRPCClient<Config> {
     });
   }
 
-  private mountMessageListener() {
+  private async listen() {
     if (this.isListenerMounted) return;
     this.isListenerMounted = true;
     
@@ -82,6 +100,11 @@ export class RPCClient<Config> implements IRPCClient<Config> {
       try {
         // parse message
         const serverMessage = this.decodeMessage(rawServerMessage);
+
+        // If server is not healthy, that's client is not ready for receive message
+        if (!this.canReceiveMessage(serverMessage?.data?.service)) {
+          console.warn(`Service Center is not ready but receive message. Please Check:`, serverMessage);
+        }
 
         if (!serverMessage || !serverMessage.id || !serverMessage.data) {
           throw new Error(`Invalid Message, or without id, data`);
