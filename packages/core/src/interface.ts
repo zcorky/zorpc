@@ -38,7 +38,7 @@ export interface IRPCChannelClientSide<Config> extends IRPCChannel<Config> {
 }
 
 export interface IRPCChannelServerSide<Config> extends IRPCChannel<Config> {
-  middleware(): (...args: any) => void;
+  middleware?(): (...args: any) => void;
 }
 
 export interface MessageHandler {
