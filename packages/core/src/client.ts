@@ -56,9 +56,9 @@ export class RPCClient<Config> implements IRPCClient<Config> {
     await this.healthCheck();
   }
 
-  public consume<Input, Output>(service: string, input: Input): Promise<Output>
-  public consume<Input, Output>(service: string, input: Input, callback: (output: Output) => void): void
-  public consume<Input, Output>(service: any, input: Input, callback?: any): any {
+  public consume<Input, Output = any>(service: string, input: Input): Promise<Output>
+  public consume<Input, Output = any>(service: string, input: Input, callback: (output: Output) => void): void
+  public consume<Input, Output = any>(service: any, input: Input, callback?: any): any {
     if (!this.canSendMessage(service)) {
       throw new Error(`Service Center is not ready. Please Connect first or Check what's wrong ?`);
     }

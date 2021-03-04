@@ -146,7 +146,7 @@ describe("@zorpc/channel-express", () => {
   }); 
 
   it('works', async () => {
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         // console.log('setTimeout run');
   
@@ -171,7 +171,7 @@ describe("@zorpc/channel-express", () => {
   });
 
   it('add option onMessageEncrypt/Decrypt', async () => {
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         // console.log('setTimeout run');
   
@@ -201,7 +201,7 @@ describe("@zorpc/channel-express", () => {
       throw error;
     });
 
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         // console.log('setTimeout run');
   
@@ -221,7 +221,7 @@ describe("@zorpc/channel-express", () => {
   });
 
   it('server channel postMessage error structure, client call onError', async () => {
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
           rpc.client.consume('service.notfound', null).catch((result: any) => {
@@ -240,7 +240,7 @@ describe("@zorpc/channel-express", () => {
       callback(null, 'good');
     });
 
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
           rpc.client.consume('callback.service', null, (result: any) => {

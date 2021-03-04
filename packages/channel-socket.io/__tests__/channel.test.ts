@@ -131,7 +131,7 @@ describe("@zorpc/channel-socket.io", () => {
 
 
   it('works', async () => {
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         // console.log('setTimeout run');
   
@@ -175,7 +175,7 @@ describe("@zorpc/channel-socket.io", () => {
       callback(null, 'good');
     });
 
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
           rpc.client.consume('callback.service', null, (result: any) => {

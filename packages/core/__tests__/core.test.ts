@@ -192,7 +192,7 @@ describe("@zorpc/core", () => {
   }); 
 
   it('works', async () => {
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         // console.log('setTimeout run');
         rpc.client.connect().then(() => {
@@ -213,7 +213,7 @@ describe("@zorpc/core", () => {
   });
 
   it('add option onMessageEncrypt/Decrypt', async () => {
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         // console.log('setTimeout run');
   
@@ -243,7 +243,7 @@ describe("@zorpc/core", () => {
       throw error;
     });
 
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         // console.log('setTimeout run');
   
@@ -263,7 +263,7 @@ describe("@zorpc/core", () => {
   });
 
   it('server channel postMessage error structure, client call onError', async () => {
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
           rpc.client.consume('service.notfound', null).catch((error: any) => {
@@ -282,7 +282,7 @@ describe("@zorpc/core", () => {
       callback(null, 'good');
     });
 
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
           rpc.client.consume('callback.service', null, (result: any) => {
@@ -367,7 +367,7 @@ describe("@zorpc/core", () => {
       virtualServer.listen();
     }); 
     
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
           // rpc.client.consume('callback.service', null, (result: any) => {
@@ -453,7 +453,7 @@ describe("@zorpc/core", () => {
       virtualServer.listen();
     }); 
     
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         rpc.client.connect().then(() => {
           // rpc.client.consume('callback.service', null, (result: any) => {
