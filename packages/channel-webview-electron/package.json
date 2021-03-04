@@ -1,6 +1,6 @@
 {
   "name": "@zorpc/channel-webview-electron",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Zorpc channel on electron webview",
   "keywords": [
     "rpc",
@@ -72,7 +72,7 @@
     "url": "https://github.com/zcorky/zodash/issues"
   },
   "dependencies": {
-    "@zorpc/core": "^0.0.9"
+    "@zorpc/core": "^0.1.0"
   },
   "peerDependencies": {
     "electron": "^12.0.0"

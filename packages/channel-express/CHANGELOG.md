@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.9](https://github.com/zcorky/zodash/compare/@zorpc/channel-express@0.0.8...@zorpc/channel-express@0.0.9) (2021-03-04)
+
+**Note:** Version bump only for package @zorpc/channel-express
+
+
+
+
+
 ## [0.0.8](https://github.com/zcorky/zodash/compare/@zorpc/channel-express@0.0.7...@zorpc/channel-express@0.0.8) (2019-09-10)
 
 **Note:** Version bump only for package @zorpc/channel-express
