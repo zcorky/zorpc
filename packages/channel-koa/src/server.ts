@@ -58,7 +58,7 @@ export class Server implements IRPCChannelServerSide<IServerConfig> {
         // @LOGGER need a logger: hit rpc
         const input = (ctx.request as any).body;
         // @TODO should valid message id before use input.id
-        return await new Promise((resolve, reject) => {
+        return await new Promise<void>((resolve, reject) => {
           this.server.createCallback(
             input.id,
             (output: string) => {
