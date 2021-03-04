@@ -1,4 +1,3 @@
-import { EncodedMessage } from './interface';
 export interface Message<T> {
   id: string;
   timestamps: number;
@@ -39,7 +38,7 @@ export interface IRPCChannelClientSide<Config> extends IRPCChannel<Config> {
 }
 
 export interface IRPCChannelServerSide<Config> extends IRPCChannel<Config> {
-  middleware(): (...args: any) => void;
+  middleware?(): (...args: any) => void;
 }
 
 export interface MessageHandler {
